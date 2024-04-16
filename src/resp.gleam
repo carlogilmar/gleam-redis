@@ -9,6 +9,7 @@ pub type RESP {
   BulkString(String)
   SimpleError(String)
   Array(List(RESP))
+  Null
   }
 
 type ParserResult =
@@ -28,6 +29,7 @@ pub fn encode(resp: RESP) -> String {
       <> resps
       |> list.map(encode)
       |> string.join(with: "")
+    Null -> "_" <> crlf
   }
 }
 
@@ -43,6 +45,7 @@ fn parse(input: String) -> Result(#(RESP, String), String) {
     Ok(#("+", rest)) -> parse_simple_string(rest)
     Ok(#("$", rest)) -> parse_bulk_string(rest)
     Ok(#("*", rest)) -> parse_array(rest)
+    Ok(#("_", rest)) -> parse_null(rest)
     Ok(#(c, _)) -> Error("Unknown RESP type '" <> c <> "'")
     Error(Nil) -> Error("Empty input")
   }
@@ -98,3 +101,9 @@ fn parse_array_rec(input, n, acc) {
   }
 }
 
+fn parse_null(input) -> ParserResult {
+  case string.first(input) {
+    Ok(c) if c == crlf -> Ok(#(Null, string.drop_left(input, 1)))
+    _ -> Error("Null not terminated by crlf")
+  }
+}
