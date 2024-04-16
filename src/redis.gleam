@@ -1,23 +1,21 @@
 import gleam/io
 
-// Uncomment this block to pass the first stage
-//
-// import gleam/erlang/process
-// import gleam/option.{None}
-// import gleam/otp/actor
-// import glisten
+import gleam/erlang/process
+import gleam/option.{None}
+import gleam/otp/actor
+import glisten
 
 pub fn main() {
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  io.println("Logs from your program will appear here!")
+  io.println(" Aquí ANDAMOS PERRO")
 
-  // Uncomment this block to pass the first stage
-  //
-  // let assert Ok(_) =
-  //   glisten.handler(fn(_conn) { #(Nil, None) }, fn(_msg, state, _conn) {
-  //     actor.continue(state)
-  //   })
-  //   |> glisten.serve(6379)
-  //
-  // process.sleep_forever()
+   let assert Ok(_redis_conn) = // assert successful connection
+     glisten.handler(
+        fn(_conn) { #(Nil, None) }, // fun to handle incoming connections
+        fn(msg, state, _conn) { //fun to handle messages
+          io.debug(msg)
+          actor.continue(state)
+     })
+     |> glisten.serve(6379) // Uses the handler to start a server
+
+  process.sleep_forever()
 }
